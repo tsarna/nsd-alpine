@@ -10,7 +10,7 @@ updates automatically.
 
 ## Image published to
 
-`tsarna/nsd-alpine` on Docker Hub — tag: `latest`
+`ghcr.io/tsarna/nsd-alpine` on GHCR — tag: `latest`
 
 ## Usage in kubical-gitops
 
