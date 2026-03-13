@@ -8,7 +8,8 @@ RUN apk add --no-cache nsd
 # UID/GID 993 so Kubernetes runAsNonRoot can verify the user is non-root.
 # NSD is started as this user directly (no setuid), so nsd.conf should have
 # username: "" to skip the privilege-drop attempt.
-RUN deluser nsd && delgroup nsd && \
+RUN deluser nsd 2>/dev/null || true && \
+    delgroup nsd 2>/dev/null || true && \
     addgroup -S -g 993 nsd && \
     adduser -S -u 993 -G nsd -H -s /sbin/nologin nsd
 
