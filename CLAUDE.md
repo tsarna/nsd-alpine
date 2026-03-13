@@ -10,7 +10,7 @@ updates automatically.
 
 ## Image published to
 
-`ghcr.io/tsarna/nsd-alpine` — tags: `latest` and `<nsd-version>` (e.g. `4.14.1`)
+`tsarna/nsd-alpine` on Docker Hub — tag: `latest`
 
 ## Usage in kubical-gitops
 
