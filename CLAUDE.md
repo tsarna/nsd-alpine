@@ -1,12 +1,12 @@
 # nsd-alpine
 
-Alpine 3.23-based Docker image for NLnetLabs NSD authoritative DNS server.
+Alpine edge-based Docker image for NLnetLabs NSD authoritative DNS server.
 
-## Why alpine:3.23
+## Why alpine:edge
 
-NSD 4.12+ introduced native Prometheus metrics. Alpine 3.23 ships NSD 4.14.x
-which includes that support. The weekly rebuild cron picks up NSD patch updates
-within 3.23 automatically.
+NSD 4.12+ introduced native Prometheus metrics. Alpine stable (3.23) only ships
+NSD 4.13.x; only edge has 4.14.x. The weekly rebuild cron picks up NSD updates
+automatically.
 
 ## Image published to
 

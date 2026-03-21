@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   schedule:
-    # Rebuild weekly to pick up NSD updates within Alpine 3.23
+    # Rebuild weekly to pick up Alpine edge NSD updates
     - cron: "0 6 * * 1"
 
 jobs:
@@ -21,8 +21,8 @@ jobs:
       - name: Get NSD and Alpine versions
         id: versions
         run: |
-          NSD_VERSION=$(docker run --rm alpine:3.23 sh -c 'apk update -q && apk search -e nsd' | grep '^nsd-[0-9]' | sed 's/nsd-\([0-9.]*\).*/\1/')
-          ALPINE_VERSION=$(docker run --rm alpine:3.23 cat /etc/alpine-release)
+          NSD_VERSION=$(docker run --rm alpine:edge sh -c 'apk update -q && apk search -e nsd' | grep '^nsd-[0-9]' | sed 's/nsd-\([0-9.]*\).*/\1/')
+          ALPINE_VERSION=$(docker run --rm alpine:edge cat /etc/alpine-release)
           echo "NSD version: ${NSD_VERSION}"
           echo "Alpine version: ${ALPINE_VERSION}"
           echo "nsd=${NSD_VERSION}" >> $GITHUB_OUTPUT
