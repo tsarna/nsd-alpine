@@ -1,7 +1,5 @@
-FROM alpine:edge
+FROM alpine:3.23
 
-# Alpine edge has NSD 4.14.x which includes native Prometheus metrics support
-# (introduced in NSD 4.12). nsd-control is included in the nsd package.
 RUN apk add --no-cache nsd
 
 # Alpine's nsd package creates user/group nsd. Recreate with explicit numeric

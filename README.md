@@ -1,2 +1,2 @@
 # nsd-alpine
-Alpine-based image for NLNetLabs NSD authoritative NSD server
+Alpine-based image for NLNetLabs NSD authoritative DNS server
