@@ -28,7 +28,7 @@ jobs:
           echo "nsd=${NSD_VERSION}" >> $GITHUB_OUTPUT
           echo "alpine=${ALPINE_VERSION}" >> $GITHUB_OUTPUT
 
-      - uses: docker/login-action@v3
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
