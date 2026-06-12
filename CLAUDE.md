@@ -1,16 +1,26 @@
 # nsd-alpine
 
-Alpine edge-based Docker image for NLnetLabs NSD authoritative DNS server.
+Alpine-based Docker image for NLnetLabs NSD authoritative DNS server.
 
-## Why alpine:edge
+## Why alpine:3.24
 
-NSD 4.12+ introduced native Prometheus metrics. Alpine stable (3.23) only ships
-NSD 4.13.x; only edge has 4.14.x. The weekly rebuild cron picks up NSD updates
-automatically.
+NSD 4.12+ introduced native Prometheus metrics. The image was previously on
+`alpine:edge` because stable lagged at NSD 4.13.x. Alpine 3.24 now ships NSD
+4.14.x, so the image pins to `alpine:3.24` (minor tag — patch rebuilds pick up
+security/NSD fixes within 3.24, without auto-jumping to 3.25).
+
+There is no longer a scheduled rebuild cron. CI builds on push to `main` and can
+be rebuilt on demand via the `workflow_dispatch` trigger to pick up upstream
+package updates.
 
 ## Image published to
 
-`ghcr.io/tsarna/nsd-alpine` on GHCR — tag: `latest`
+`ghcr.io/tsarna/nsd-alpine` on GHCR. Tags track the NSD version contained in the
+image (rolling, like official Docker images), built on push to `main`:
+
+- `latest`
+- `4`, `4.14`, `4.14.2` — NSD major / minor / full version
+- `4.14.2-alpine3.24` — NSD + Alpine, fully qualified
 
 ## Usage in kubical-gitops
 

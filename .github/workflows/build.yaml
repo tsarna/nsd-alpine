@@ -3,9 +3,9 @@ name: Build and push
 on:
   push:
     branches: [main]
-  schedule:
-    # Rebuild weekly to pick up Alpine edge NSD updates
-    - cron: "0 6 * * 1"
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -16,19 +16,41 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - uses: docker/setup-qemu-action@v3
+
       - uses: docker/setup-buildx-action@v4
 
-      - name: Get NSD and Alpine versions
+      - name: Determine NSD and Alpine versions
         id: versions
         run: |
-          NSD_VERSION=$(docker run --rm alpine:edge sh -c 'apk update -q && apk search -e nsd' | grep '^nsd-[0-9]' | sed 's/nsd-\([0-9.]*\).*/\1/')
-          ALPINE_VERSION=$(docker run --rm alpine:edge cat /etc/alpine-release)
-          echo "NSD version: ${NSD_VERSION}"
-          echo "Alpine version: ${ALPINE_VERSION}"
-          echo "nsd=${NSD_VERSION}" >> $GITHUB_OUTPUT
-          echo "alpine=${ALPINE_VERSION}" >> $GITHUB_OUTPUT
+          NSD_VERSION=$(docker run --rm alpine:3.24 sh -c 'apk update -q && apk search -e nsd' \
+            | sed -n 's/^nsd-\([0-9][0-9.]*\).*/\1/p')
+          ALPINE_VERSION=$(docker run --rm alpine:3.24 cat /etc/alpine-release)
+          ALPINE_MINOR=${ALPINE_VERSION%.*}
+          NSD_MINOR=${NSD_VERSION%.*}
+          NSD_MAJOR=${NSD_VERSION%%.*}
+          echo "NSD version: ${NSD_VERSION} (major ${NSD_MAJOR}, minor ${NSD_MINOR})"
+          echo "Alpine version: ${ALPINE_VERSION} (minor ${ALPINE_MINOR})"
+          {
+            echo "nsd=${NSD_VERSION}"
+            echo "nsd_minor=${NSD_MINOR}"
+            echo "nsd_major=${NSD_MAJOR}"
+            echo "alpine_minor=${ALPINE_MINOR}"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/nsd-alpine
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ steps.versions.outputs.nsd_major }},enable={{is_default_branch}}
+            type=raw,value=${{ steps.versions.outputs.nsd_minor }},enable={{is_default_branch}}
+            type=raw,value=${{ steps.versions.outputs.nsd }},enable={{is_default_branch}}
+            type=raw,value=${{ steps.versions.outputs.nsd }}-alpine${{ steps.versions.outputs.alpine_minor }},enable={{is_default_branch}}
 
       - uses: docker/login-action@v4
+        if: github.event_name != 'pull_request'
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -38,7 +60,9 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/nsd-alpine:latest
-            ghcr.io/${{ github.repository_owner }}/nsd-alpine:${{ steps.versions.outputs.nsd }}-alpine${{ steps.versions.outputs.alpine }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
